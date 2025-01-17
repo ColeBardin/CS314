@@ -10,7 +10,7 @@ typedef enum{
 	LED_FLASH
 } led_state_e;
 
-int read_button(int fd);
+int read_pin(int gfd, int pin);
 
 void main(){
 	int fd;
@@ -30,9 +30,9 @@ void main(){
 	fprint(fd, "pulldown %d", LED);
 
 	for(;;){
-		button = read_button(fd);
+		button = read_pin(fd, BUTTON);
 		if(button){
-			while(read_button(fd)) sleep(10);
+			while(read_pin(fd, BUTTON)) sleep(10);
 			state++;
 			if(state > LED_FLASH) state = LED_OFF;
 		}
@@ -53,12 +53,12 @@ void main(){
 	}		
 }
 
-int read_button(int fd){
+int read_pin(int gfd, int pin){
 	char buf[16] = {0};
 	uvlong gvals;
 
-	read(fd, buf, 16);
+	read(gfd, buf, 16);
 	gvals = strtoull(buf, nil, 16);
 
-	return 1 & (gvals >> BUTTON);
+	return 1 & (gvals >> pin);
 }
