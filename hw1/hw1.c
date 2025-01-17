@@ -2,9 +2,9 @@
 #include <libc.h>
 
 #define BUTTON 20 /* Pin 20 - Button Input */
-#define LED 21 /* Pin 21 - LED Output */
+#define LED         21 /* Pin 21 - LED Output */
 
-typedef enum {
+typedef enum{
 	LED_OFF,
 	LED_ON,
 	LED_FLASH
@@ -20,6 +20,10 @@ void main(){
 
 	bind("#G", "/dev", MAFTER);
 	fd = open("/dev/gpio", ORDWR);
+	if(fd < 0){
+		fprint(2, "ERROR: Failed to open GPIO driver file\n");
+		return;
+	}
 	fprint(fd, "function %d in", BUTTON);
 	fprint(fd, "pulldown %d", BUTTON);
 	fprint(fd, "function %d out", LED);
