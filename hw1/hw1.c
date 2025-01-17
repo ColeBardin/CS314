@@ -28,12 +28,9 @@ void main(){
 	for(;;){
 		button = read_button(fd);
 		if(button){
-			print("button pressed\n");
 			while(read_button(fd)) sleep(10);
-			print("button released\n");
 			state++;
 			if(state > LED_FLASH) state = LED_OFF;
-			print("new state: %d\n", state);
 		}
 
 		switch(state){
