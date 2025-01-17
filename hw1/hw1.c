@@ -2,7 +2,7 @@
 #include <libc.h>
 
 #define BUTTON 20 /* Pin 20 - Button Input */
-#define LED         21 /* Pin 21 - LED Output */
+#define LED 21 /* Pin 21 - LED Output */
 
 typedef enum{
 	LED_OFF,
