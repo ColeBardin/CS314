@@ -54,7 +54,8 @@ void main(){
 }
 
 int read_pin(int gfd, int pin){
-	char buf[16] = {0};
+	char buf[17] = {0};
+	buf[16] = 0;
 	uvlong gvals;
 
 	read(gfd, buf, 16);
