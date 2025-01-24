@@ -8,7 +8,7 @@
 void main(){
 	int fd_ctl;
 	int fd_data;
-	uchar data[7] = {0};
+	uchar data[8] = {0};
 	int seconds;
 	int minutes;
 	int hours;
@@ -31,29 +31,39 @@ void main(){
 		return;
 	}
 
-	if(write(fd_data, data, 7) < 1){
+	// Initialize to 0/0/0 0:0:0 in 24 Hour Mode, CH=0
+	// Control Register 0x07:
+	// [7] = OUT pin control when square wave output is disabled
+	// [6:5] = 0
+	// [4] = Square wave output enable
+	// [3:2] = 0
+	// [1:0] = Square Wave Rate Select. 00=1kHz, 01=4kHz, 10=8kHz, 11=32kHz
+	// Control Register = 0x00: OUT pin disabled, square wave disabled, RS value ignored
+	data[7] = 0x00;
+	if(write(fd_data, data, 8) < 1){
 		fprint(2, "ERROR: Failed to write init values to I2C device\n");
 		return;
 	}
+
 	for(;;){
 		if(read(fd_data, data, 7) < 1){
 			fprint(2, "ERROR: Failed to read from I2C device\n");
 			return;
 		}
 
-		// Seconds Register: 0x00
+		// Seconds Register 0x00:
 		// [7]    = Clock Halt
 		// [6:4] = 10 Seconds
 		// [3:0] = Seconds
 		seconds = (data[0] & 0xF) + 10 * ((data[0] >> 4) & 0x7);	
 
-		// Minutes Register: 0x01	
+		// Minutes Register 0x01:	
 		// [7]    = 0
 		// [6:4] = 10 Minutes
 		// [3:0] = Minutes
 		minutes = (data[1] & 0xF) +  10 * ((data[1] >> 4) & 0x7);
 
-		// Hours Regiser: 0x02
+		// Hours Regiser: 0x02:
 		// [7]    = 0
 		// [6]    = 0 for 24H, 1 for 12H
 		// [5]    = 10 Hours[1] when in 24H mode, AM/PM when in 12H mode
@@ -61,19 +71,19 @@ void main(){
 		// [3:0] = Hours
 		hours = (data[2] & 0xF) + 10 * ((data[2] >> 4) & 0x3);
 
-		// Date Register: 0x04	
+		// Date Register 0x04:	
 		// [7:6] = 0
 		// [5:4] = 10 Date
 		// [3:0] = Date
 		date = (data[4] & 0xF) +  10 * ((data[4] >> 4) & 0x3);
 
-		// Month Register: 0x05
+		// Month Register 0x05:
 		// [7:5] = 0
 		// [4]    = 10 Months
 		// [3:0] = Month
 		month = (data[5] & 0xF) +  10 * ((data[5] >> 4) & 0x1);
 
-		// Year Register: 0x06
+		// Year Register 0x06:
 		// [7:4] = 10 Years
 		// [3:0] = Year
 		year = (data[6] & 0xF) +  10 * ((data[6] >> 4) & 0xF);
