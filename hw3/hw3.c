@@ -68,6 +68,7 @@ void main(){
 	fprint(fd_gpio, "funciton %d out", CS);
 	fprint(fd_gpio, "function %d out", RST);
 	fprint(fd_spictl, "clock 32000000");
+	fprint(fd_spictl, "mode 0\n");
 
 	print("Initializing LCD screen...\n");
 	lcd_init();
