@@ -63,10 +63,17 @@ void main(){
 	fprint(fd_gpio, "function %d in", PIO);
 	fprint(fd_gpio, "set %d 0", PIO);
 
+	print("~~~~~~~~~~ 1-Wire Project ~~~~~~~~~~\n");
+
 	id = get_id(fd_gpio, &fam, nil);
-	print("Product: Family(0x%x), ID(0x012x)\n\n", fam, id);
-	
-	sleep(500);
+	print("Product: Family(0x%x), ID(0x012x)\n", fam, id);
+
+	sleep(10);
+
+	read_mem(fd_gpio, d, 0x0085, 1);
+	print("Factory Byte: 0x%x\n", d[0]);
+
+	sleep(10);
 
 	for(i = 0; i  < 8; i++) d[i] = 8 - i;
 	addr = 0x0000;
@@ -96,7 +103,7 @@ int read_mem(int fd, uchar *d, ushort address, uint nbytes){
 	}
 	w1wire(fd, ROM_SKIP);
 	w1wire(fd, RM);
-	w1wire(fd, address & 0xF);
+	w1wire(fd, address & 0xFF);
 	w1wire(fd, address >> 8);
 	for(count = 0; count < nbytes; count++){
 		if(address + count >= ADDR_MAX) break;
@@ -122,7 +129,7 @@ int write_mem(int fd, uchar *d, ushort address){
 	
 	crc16 = read_sc(fd, d, &TA, &ES);
 	print("Read from SC, TA: 0x%04x, ES:0x%x (CRC16: 0x%04x)\n", TA, ES, crc16);
-	
+
 	ret = 0 | copy_sc(fd, TA, ES);
 	print("Copied SC to MEM: ret: 0x%x\n", ret);
 
@@ -130,16 +137,20 @@ int write_mem(int fd, uchar *d, ushort address){
 }
 
 uchar copy_sc(int fd, ushort TA, uchar ES){
+	uchar ret;
+
 	if(reset1wire(fd) == 0){
 		fprint(2, "1wire reset failure\n");
 		return 0xFF;
 	}
 	w1wire(fd, ROM_SKIP);
 	w1wire(fd, CPS);
-	w1wire(fd, TA & 0xF);
+	w1wire(fd, TA & 0xFF);
 	w1wire(fd, TA >> 8);
 	w1wire(fd, ES);
-	return r1wire(fd);
+	ret = r1wire(fd);
+
+	return ret;
 }
 
 ushort read_sc(int fd, uchar *d, ushort *TA_p, uchar *ES_p){
@@ -186,7 +197,7 @@ ushort write_sc(int fd, uchar *d, ushort TA){
 	}
 	w1wire(fd, ROM_SKIP);
 	w1wire(fd, WS);
-	w1wire(fd, TA & 0xF);
+	w1wire(fd, TA & 0xFF);
 	w1wire(fd, TA >> 8);
 	
 	for(i = 0; i < 8; i++) w1wire(fd, d[i]);
