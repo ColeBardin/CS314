@@ -1,0 +1,2 @@
+a4: hw4.c
+	5c -o hw4.o hw4.c && 5l -o hw4 hw4.o
