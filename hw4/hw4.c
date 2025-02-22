@@ -139,7 +139,6 @@ uchar copy_sc(int fd, ushort TA, uchar ES){
 	w1wire(fd, TA & 0xF);
 	w1wire(fd, TA >> 8);
 	w1wire(fd, ES);
-	udelay(TPRG);
 	return r1wire(fd);
 }
 
