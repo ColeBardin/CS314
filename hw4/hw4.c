@@ -8,8 +8,8 @@
 #define TRSTL 600
 #define TPDH 65
 #define TRSTH 480
-#define TSLOT 110
-#define TW0L 60
+#define TSLOT 130
+#define TW0L 70
 #define TPRG 15
 
 /* ROM Commands */
