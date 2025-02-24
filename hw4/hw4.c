@@ -6,10 +6,10 @@
 
 /* Timing macros */
 #define TRSTL 600
-#define TPDH 60
+#define TPDH 65
 #define TRSTH 480
-#define TSLOT 120
-#define TW0L 80
+#define TSLOT 130
+#define TW0L 90
 #define TPRG 12
 
 /* ROM Commands */
@@ -31,6 +31,14 @@
 #define CPS_OK 0xAA
 #define ADDR_MAX 0xFF
 
+#define KEYSIZE 32
+#define USAGE fprint(2, "USAGE: %s [-n|-r|-c]\n", argv[0]);\
+fprint(2, "\t-n\t generate new key and store it in memory\n");\
+fprint(2, "\t-r\t read key from memory\n");\
+fprint(2, "\t-c\t clear key from memory\n");
+
+int write_key(int, uchar *, int);
+int generate_key(uchar *, uint);
 int read_mem(int, uchar *, ushort, uint);
 int write_mem(int, uchar *, ushort);
 uchar copy_sc(int, ushort, uchar);
@@ -42,7 +50,7 @@ uchar r1wire(int);
 int reset1wire(int);
 void udelay(long);
 
-void main(){
+int main(int argc, char *argv[]){
 	int i;
 	int fd_gpio;
 	uchar d[8] = {0};
@@ -50,6 +58,18 @@ void main(){
 	uchar ret;
 	ulong id;
 	uchar fam;
+	uchar key[KEYSIZE] = {0};
+
+	if(argc != 2){
+		fprint(2, "ERROR: Incorrect number of arguments\n");
+		USAGE
+		return 1;
+	}
+	if(argv[1][0] != '-'){
+		fprint(2, "ERROR: provided argument is not a flag: %s\n", argv[1]);
+		USAGE
+		return 1;
+	}
 
 	fd_gpio = open("/dev/gpio", MAFTER);
 	if(fd_gpio < 0){
@@ -57,7 +77,7 @@ void main(){
 		fd_gpio = open("/dev/gpio", MAFTER);
 		if(fd_gpio < 0){
 			fprint(2, "ERROR: Failed to open GPIO driver file\n");
-			return;
+			return 1;
 		}
 	}
 	fprint(fd_gpio, "function %d in", PIO);
@@ -70,20 +90,63 @@ void main(){
 
 	sleep(10);
 
-	read_mem(fd_gpio, d, 0x0085, 1);
-	print("Factory Byte: 0x%x\n", d[0]);
+	switch(argv[1][1]){
+		case 'n':
+			print("Generating new key...\n");
+			if(generate_key(key, KEYSIZE) == -1){
+				fprint(2, "Failed to generate new key\n");
+				return 1;
+			}
 
-	sleep(10);
+			print("New key: 0x");
+			for(i = 0; i < KEYSIZE; i++) print("%02x", key[i]);
 
-	for(i = 0; i  < 8; i++) d[i] = 8 - i;
-	addr = 0x0000;
-	write_mem(fd_gpio, d, addr);
+			write_key(fd_gpio, key, KEYSIZE);
+			memset(key, 0, KEYSIZE);
+		case 'r':
+			print("Reading key from memory...\n");
+			read_mem(fd_gpio, key, 0, KEYSIZE);
 
-	sleep(500);
-	for(i = 0; i < 8; i++) d[i] = 0;
+			print("Read key: 0x");
+			for(i = 0; i < KEYSIZE; i++) print("%02x", key[i]);
+			print("\n");
+			break;
+		case 'c':
+			print("Clearing key from memory...\n");
+			memset(key, 0, KEYSIZE);
+			write_key(fd_gpio, key, KEYSIZE);
+			break;
+	}
 
-	read_mem(fd_gpio, d, addr, 8);
-	for(i = 0; i < 8; i++) print("Mem read %d: %d\n", i, d[i]);
+	return 0;
+}
+
+int write_key(int fd, uchar *key, int size){
+	int i;
+	print("\nWriting key to memory...\n");
+	for(i = 0; i < size; i += 8){
+		write_mem(fd, &key[i], i);
+		sleep(50);
+	}
+	return 0;
+}
+
+int generate_key(uchar *key, uint size){
+	int fd;
+	int ret;
+
+	fd = open("/dev/random", OREAD);
+	if(fd < 0){
+		fprint(2, "ERROR: Failed to open /dev/random: %r\n");
+		return -1;
+	}
+
+	ret = readn(fd, key, size);
+	if(ret != size){
+		fprint(2, "ERROR: failed to read enough bytes from /dev/random\n");
+		return -1;
+	}
+	return ret;
 }
 
 int read_mem(int fd, uchar *d, ushort address, uint nbytes){
@@ -108,6 +171,7 @@ int read_mem(int fd, uchar *d, ushort address, uint nbytes){
 	for(count = 0; count < nbytes; count++){
 		if(address + count >= ADDR_MAX) break;
 		d[count] = r1wire(fd);
+		sleep(10);
 	}
 	return count;	
 }
@@ -125,13 +189,13 @@ int write_mem(int fd, uchar *d, ushort address){
 
 	TA = address;
 	crc16 = write_sc(fd, d, TA);
-	print("Wrote to SC, TA: 0x%04x (CRC16: 0x%04x)\n", TA, crc16);
+	//print("Wrote to SC, TA: 0x%04x (CRC16: 0x%04x)\n", TA, crc16);
 	
 	crc16 = read_sc(fd, d, &TA, &ES);
-	print("Read from SC, TA: 0x%04x, ES:0x%x (CRC16: 0x%04x)\n", TA, ES, crc16);
+	//print("Read from SC, TA: 0x%04x, ES:0x%x (CRC16: 0x%04x)\n", TA, ES, crc16);
 
 	ret = copy_sc(fd, TA, ES);
-	print("Copied SC to MEM: ret: 0x%x\n", ret);
+	//print("Copied SC to MEM: ret: 0x%x\n", ret);
 
 	return ret != CPS_OK;
 }
