@@ -8,9 +8,9 @@
 #define TRSTL 600
 #define TPDH 65
 #define TRSTH 480
-#define TSLOT 130
-#define TW0L 90
-#define TPRG 12
+#define TSLOT 110
+#define TW0L 60
+#define TPRG 15
 
 /* ROM Commands */
 #define ROM_READ 0x33
@@ -100,6 +100,7 @@ int main(int argc, char *argv[]){
 
 			print("New key: 0x");
 			for(i = 0; i < KEYSIZE; i++) print("%02x", key[i]);
+			print("\n");
 
 			write_key(fd_gpio, key, KEYSIZE);
 			memset(key, 0, KEYSIZE);
@@ -123,10 +124,10 @@ int main(int argc, char *argv[]){
 
 int write_key(int fd, uchar *key, int size){
 	int i;
-	print("\nWriting key to memory...\n");
+	print("Writing key to memory...\n");
 	for(i = 0; i < size; i += 8){
 		write_mem(fd, &key[i], i);
-		sleep(50);
+		sleep(100);
 	}
 	return 0;
 }
