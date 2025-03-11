@@ -1,0 +1,17 @@
+bms: main.o LTC6813.o LTC681x.o spi.o
+	5l -o bms main.o LTC6813.o LTC681x.o spi.o
+
+main.o: main.c LTC6813.h
+	5c -o main.o main.c
+
+LTC6813.o: LTC6813.c LTC6813.h LTC681x.h
+	5c -o LTC6813.o LTC6813.c
+
+LTC681x.o: LTC681x.c LTC681x.h spi.h
+	5c -o LTC681x.o LTC681x.c
+
+spi.o: spi.c spi.h
+	5c -o spi.o spi.c
+
+clean:
+	rm -fr *.o bms
