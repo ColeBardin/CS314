@@ -69,7 +69,7 @@ void main(){
     	while(1){
         		accumulator_read_volt(&acc);
 		accumulator_print_stat(&acc);
-        		sleep(1000);
+        		sleep(5000);
     	}
 
     	return;
@@ -198,6 +198,8 @@ void accumulator_print_stat(accumulator_t *acc){
     	if(!acc) return;
 
     	int seg;
+	int cell;
+
 	char *line = "~~~~~~~~~~~~~~~~~~~~\n";
 
 	print(line);
@@ -209,7 +211,8 @@ void accumulator_print_stat(accumulator_t *acc){
         		print("\tTotal Voltage: %5.2f V\n", acc->ic_arr[seg].total_volt);
         		print("\tMax Voltage:   %5.2f V\n", acc->ic_arr[seg].max_volt);
         		print("\tMin Voltage:   %5.2f V\n", acc->ic_arr[seg].min_volt);
-        		print("\n");
+		for(cell = 0; cell < NCELLS; cell++) print("[#%2d:  %4.2f V] ", cell, acc->ic_arr[seg].voltage[cell]);
+        		print("\n\n");
     	}
 	print(line);
 }

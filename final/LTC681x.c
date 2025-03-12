@@ -46,8 +46,8 @@
 
 #include "LTC681x.h"
 
-uint8_t blank_data[100] = {0xFF};
-uint8_t data[1024] = {0};
+uint8_t blank_data[1024] = {0xFF};
+uint8_t data[2048] = {0};
 
 /* Wake isoSPI up from IDLE state and enters the READY state */
 void wakeup_idle(ltc681x_driver_t *dev) //Number of ICs in the system
@@ -2232,7 +2232,6 @@ int LTC681x_init(ltc681x_driver_t *dev,
 		for(j = 0; j < 18; j++) dev->ic_arr[i].voltage[j] = 0.0;
 		for(j = 0; j < 24; j++) dev->ic_arr[i].temp[j] = 0.0;
 	}
-	// TODO: determine if other config is needed
     
 	return ret;
 }
@@ -2240,6 +2239,6 @@ int LTC681x_init(ltc681x_driver_t *dev,
 void udelay(long t){
 	ulong i;
 	t *= 1000;
-	for(i = 0; i < t; i++) {}
+	for(i = 0; i < t; i++);
 }
 

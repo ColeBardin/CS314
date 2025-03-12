@@ -38,7 +38,8 @@ int spi_init(spi_driver *spi){
     spi->fd_spid = fd_spid;
 
 	fprint(fd_spic, "clock 32000000");
-	fprint(fd_spic, "mode 0\n");
+	// LTC6813 DS is wrong about what SPI mode to use
+	fprint(fd_spic, "mode 2\n");
 
     return 0;
 }
