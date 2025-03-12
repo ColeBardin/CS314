@@ -37,9 +37,10 @@ int spi_init(spi_driver *spi){
     spi->fd_spic = fd_spic;
     spi->fd_spid = fd_spid;
 
-	fprint(fd_spic, "clock 32000000");
-	// LTC6813 DS is wrong about what SPI mode to use
-	fprint(fd_spic, "mode 2\n");
+	// Maximum 1Mbps for LTC6820
+	fprint(fd_spic, "clock 100000");
+	// Our LTC6820 PCB has PHA and POL = 1 -> SPI mode 3
+	fprint(fd_spic, "mode 3\n");
 
     return 0;
 }

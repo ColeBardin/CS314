@@ -36,6 +36,9 @@
 
 	System Architecture:
 	RPi <-(SPI)-> String A LTC6820 <-(isoSPI)-> Segment 0 LTC6820 <-(isoSPI)-> Segment 1 LTC6820 <-(isoSPI)-> ... <-(isoSPI)-> String B LTC6820 <-(SPI)-> RPi
+
+    BUGS: SPI manpage indicates that other SPI modes are not tested. The SPI mode is configured by pins on the LTC6820. Our PCB utilizes Mode 3
+          This could be why the values read back are not consistent.
 */
 
 #define NSEGS 1
@@ -69,7 +72,7 @@ void main(){
     	while(1){
         		accumulator_read_volt(&acc);
 		accumulator_print_stat(&acc);
-        		sleep(5000);
+        		sleep(500);
     	}
 
     	return;
