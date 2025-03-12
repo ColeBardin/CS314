@@ -2202,7 +2202,6 @@ void LTC681x_set_cs(ltc681x_driver_t *dev, int state)
 {
     if(!dev) return;
     uint32_t cs = dev->cs_pin[dev->string];
-    if(cs < 0 || state < 0) return;
     write_cs(&dev->spi, cs, state);
 	//HAL_GPIO_WritePin(dev->cs_port[dev->string], dev->cs_pin[dev->string], state);
 	return;
@@ -2231,7 +2230,7 @@ int LTC681x_init(ltc681x_driver_t *dev,
 	for(i = 0; i < num_ics; i++)
 	{
 		for(j = 0; j < 18; j++) dev->ic_arr[i].voltage[j] = 0.0;
-		for(j = 0; j < 24; j++) dev->ic_arr[j].temp[j] = 0.0;
+		for(j = 0; j < 24; j++) dev->ic_arr[i].temp[j] = 0.0;
 	}
 	// TODO: determine if other config is needed
     

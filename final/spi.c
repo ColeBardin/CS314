@@ -53,11 +53,14 @@ int cs_init(spi_driver *spi, uint cs_pin){
 }
 
 int write_cs(spi_driver *spi, uint cs_pin, uchar state){
-    if(!spi) return -1;
+    	if(!spi){
+		fprint(2, "write_cs: invalid spi pointer\n");
+		return -1;
+	}
 
-    fprint(spi->fd_gpio, "set %d %d", cs_pin, state);
+    	fprint(spi->fd_gpio, "set %d %d", cs_pin, state);
 
-    return 0;
+    	return 0;
 }
 
 int spi_write(spi_driver *spi, uchar *buf, int nbytes){
@@ -68,7 +71,7 @@ int spi_write(spi_driver *spi, uchar *buf, int nbytes){
 }
 
 int spi_read(spi_driver *spi, uchar *buf, int nbytes){
-    if(!spi) return -1;
+    	if(!spi) return -1;
 	if(nbytes < 1) return 0;
 
 	return read(spi->fd_spid, buf, nbytes);
